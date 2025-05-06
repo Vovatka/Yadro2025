@@ -1,13 +1,17 @@
 Для запуска требуется: 
-    - Компилятор GNU C++ начиная с 11.4.0
-    - Система сборки (make)
-    - CMake начиная с 3.4
+```
+mkdir build
+cd build
+cmake ..
+make
+```
 
 Запуск:
-    - перейти в папку проекта
-    - mkdir build && cd build
-    - cmake ..
-    - make
+```
+mkdir build
+cd build
+cmake ..
+make
+```
 
-Пример:
-    - ./club ../files/test1.txt
+Пример: ./club ../files/test1.txt
