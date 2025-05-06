@@ -27,9 +27,6 @@ bool ComputerClub::StartLoop() {
         std::cerr << line << std::endl;
         return false;
     }
-    for (int i = 1; i <= tables; i++) {
-        total[i] = Tuple(0, *_getMinutes("00:00"));
-    }
 
     // узнаем время работы
     if (!_setTime(line)) {
@@ -72,80 +69,73 @@ bool ComputerClub::StartLoop() {
 
         std::cout << line << std::endl;
 
-//         ID 1. Клиент пришел
-// Формат: <время> 1 <имя клиента>
-// Если клиент уже в компьютерном клубе, генерируется ошибка "YouShallNotPass"
-// Если клиент пришел в нерабочие часы, тогда "NotOpenYet"
-
+        //ID 1. Клиент пришел
         if (id == 1) {
             if (_openTime > time.value()) {
-                printError(event[2], "NotOpenYet");
+                printError(event[0], "NotOpenYet");
             }
             else if (_entered_visitors.contains(client)) {
-                printError(event[2], "YouShallNotPass"); 
+                printError(event[0], "YouShallNotPass"); 
             }
             else {
                 _entered_visitors.insert(client);
             }
         }
 
+        //ID 1. Клиент сел
         else if (id == 2) {
             if (_tables.contains(table)) {
-                printError(event[2], "PlaceIsBusy");
+                printError(event[0], "PlaceIsBusy");
             }
             else if (!_entered_visitors.contains(client)) {
-                printError(event[2], "ClientUnknown");
+                printError(event[0], "ClientUnknown");
             }
             else {
                 _tables[table] = client;
                 _visitors[client] =  Tuple{table, *time};
-                std::cout << event[2] << " " << 12 << " " << client << " " << table << std::endl;
             }
         }
 
 
-//         ID 3. Клиент ожидает
-// Формат: <время> 3 <имя клиента>
-// Если в клубе есть свободные столы, то генерируется ошибка "ICanWaitNoLonger!".
-// Если в очереди ожидания клиентов больше, чем общее число столов, то клиент уходит и генерируется событие ID 11.
-
+        //ID 3. Клиент ожидает
         else if (id  == 3) {
             if (_tables.size() < tables) {
-                printError(event[2], "ICanWaitNoLonger!");
+                printError(event[0], "ICanWaitNoLonger!");
             }
             else if (_waiting_visitors.size() > tables) {
-                std::cout << client[2] << " " << 11 <<  " " << client << std::endl;
+                std::cout << event[0] << " " << 11 <<  " " << client << std::endl;
                 _entered_visitors.erase(client);
             }
             else {
-                _waiting_visitors.push(Waiting{client, *time});
+                _waiting_visitors.push(client);
             }
         }
 
-// ID 4. Клиент ушел
-// Формат: <время> 4 <имя клиента>
-// Если клиент не находится в компьютерном клубе, генерируется ошибка "ClientUnknown".
-// Когда клиент уходит, стол, за которым он сидел освобождается и его занимает первый клиент из очереди ожидания (ID 12).
-
+        // ID 4. Клиент ушел
         else {
             if (!_entered_visitors.contains(client)) {
-                printError(event[2], "ClientUnknown");
+                printError(event[0], "ClientUnknown");
             }
             else {
                 auto [place1, t] = _visitors[client];
-                auto [all_price, all_time] = total[place1];
-                all_time += t;
-                double hours = std::chrono::duration<double, std::ratio<3600>>(t).count();
-                all_price += static_cast<int>(std::ceil(hours)) * price;
-                total[place1] = Tuple(all_price, all_time);
+                auto diff = time.value() - t;
+                int sum = static_cast<int>(std::ceil(diff.count() / 60.0)) * price;
+                if (total.contains(place1)) {
+                    auto [total_sum, total_time] = total[place1];
+                    sum += total_sum;
+                    diff += total_time;
+                }
+
+                total[place1] = Tuple(sum, diff);
 
                 _visitors.erase(client);
-                auto [wclient, mins] = _waiting_visitors.front();
+                if (!_waiting_visitors.empty()) {
+                auto wclient = _waiting_visitors.front();
                 _waiting_visitors.pop();
-                std::cout << event[2] << " " << 11 << " " << client << std::endl;
-                _visitors[wclient] = Tuple(place1, mins);
+                _visitors[wclient] = Tuple(place1, time.value());
                 _tables[place1] = wclient;
-                std::cout << event[2] << " " << 12 << " " << wclient << " " << place1 << std::endl;
+                std::cout << event[0] << " " << 12 << " " << wclient << " " << place1 << std::endl;
+                }
             }
         }
 
@@ -153,27 +143,33 @@ bool ComputerClub::StartLoop() {
         prevTime = *time;
     }
 
-    std::cout << _minutesToString(_closeTime) << std::endl;
+    std::string lastTime = _minutesToString(_closeTime);
+
     for(auto&& [client, tuple]: _visitors) {
         auto [place1, t] = tuple;
-        auto [all_price, all_time] = total[place1];
-        all_time += t;
-        int total_minutes = t.count();
-        all_price += static_cast<int>(std::ceil(total_minutes / 60.0));
-        std::cout << _minutesToString(t) << " " << 11 << " " << client << std::endl;
-        total[place1] = Tuple(all_price, all_time);
+        auto diff = _closeTime - t;
+        int sum = static_cast<int>(std::ceil(diff.count() / 60.0)) * price;
+        if (total.contains(place1)) {
+            auto [total_sum, total_time] = total[place1];
+            sum += total_sum;
+            diff += total_time;
+        }
+
+        total[place1] = Tuple(sum, diff);
+        std::cout << lastTime << " " << 11 << " " << client << std::endl;
     }
 
     while (!_waiting_visitors.empty()) {
-        auto [client, time] = _waiting_visitors.front();
-        std::cout << _minutesToString(time) << " " << 11 << " " << client << std::endl;
+        auto client = _waiting_visitors.front();
+        std::cout << lastTime << " " << 11 << " " << client << std::endl;
         _waiting_visitors.pop();
     }
+    std::cout << lastTime << std::endl;
 
-    // for (auto&& [key, value]: total) {
-    //     auto [all_price, all_time] = value;
-    //     std::cout << key << all_price << _minutesToString(all_time);
-    // }
+    for (auto&& [key, tuple]: total) {
+        auto [all_price, all_time] = tuple;
+        std::cout << key << " " << all_price << " " <<  _minutesToString(all_time) << std::endl;
+    }
     return true;
 }
 

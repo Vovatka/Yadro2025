@@ -18,9 +18,6 @@
 
 //! Кортеж для хранения номера стола и времени, когда этот стол был занят в последний раз
 using Tuple = std::tuple<int, std::chrono::minutes>; 
-//! Кортеж для хранения имени посетителя, и времени, когда он встал в очередь
-using Waiting = std::tuple<std::string, std::chrono::minutes>;
-
 
 class ComputerClub {
 public:
@@ -53,7 +50,7 @@ private:
     //! Посетители, пришедшие в клуб
     std::unordered_set<std::string> _entered_visitors;
     //! Посетители, ожидающие свободного стола
-    std::queue<Waiting> _waiting_visitors;
+    std::queue<std::string> _waiting_visitors;
     //! Посетители за столами
     std::map<std::string, Tuple> _visitors;
     //! Занятые столы
