@@ -5,6 +5,7 @@
 #include <regex>
 #include <cmath>
 #include <iomanip>
+#include <algorithm>
 
 
 ComputerClub::ComputerClub(const std::string& file): _fileName(file) {
@@ -159,11 +160,6 @@ bool ComputerClub::StartLoop() {
         std::cout << lastTime << " " << 11 << " " << client << std::endl;
     }
 
-    while (!_waiting_visitors.empty()) {
-        auto client = _waiting_visitors.front();
-        std::cout << lastTime << " " << 11 << " " << client << std::endl;
-        _waiting_visitors.pop();
-    }
     std::cout << lastTime << std::endl;
 
     for (auto&& [key, tuple]: total) {
@@ -283,5 +279,3 @@ std::string ComputerClub::_minutesToString(const std::chrono::minutes& minutes) 
 ComputerClub::~ComputerClub() {
     _data.close();
 }
-
-
