@@ -5,11 +5,7 @@ project(Yadro2025)
 set(CMAKE_CXX_STANDARD 20)
 add_library(headers INTERFACE)
 
-
-
-
 target_include_directories(headers INTERFACE inc)
-
 
 add_library(SRC
     src/ComputerClub.cpp
