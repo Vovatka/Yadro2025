@@ -4,9 +4,8 @@
     Данный класс является прототипом системы, которая следит за работой компьютерного клуба, обрабатывает события и подсчитывает выручку за день и время занятости каждого стола.
 */
 
-
 #pragma once
-// надо бы pimpl
+// Следует использовать Pimpl
 #include <string>
 #include <fstream>
 #include <chrono>
@@ -22,8 +21,8 @@ using Tuple = std::tuple<int, std::chrono::minutes>;
 class ComputerClub {
 public:
     /**
-    \brief Конструктор с параметрами
-    \tparam file - имя файла с входными данными
+    \brief Конструктор с параметром
+    \param file - имя файла с входными данными
     */
     ComputerClub(const std::string& file);
 
@@ -36,15 +35,17 @@ public:
     \brief Деструктор
     */
     ~ComputerClub();
+
     /**
     \brief Основной цикл
-    @return true если цикл пройден полностью, 
-    иначе - false
+    \return true, если цикл пройден полностью, 
+    иначе — false
     */
     bool StartLoop();
+
 private:
-    std::string _fileName; //!< имя файла
-    std::fstream _data; //!< данные из файла
+    std::string _fileName; //!< Имя файла
+    std::fstream _data; //!< Данные из файла
     std::chrono::minutes _openTime; //!< Время открытия
     std::chrono::minutes _closeTime; //!< Время закрытия
     //! Посетители, пришедшие в клуб
@@ -55,58 +56,67 @@ private:
     std::map<std::string, Tuple> _visitors;
     //! Занятые столы
     std::map<int, std::string> _tables;
-    std::map<int, Tuple> total; //<! Выручка со столов
+    std::map<int, Tuple> total; //!< Выручка со столов
 
     /**
-    \brief Функция для установки времени работы клуба
-    в минутах (сохраняет в поля _openTime и _closeTime)
-    \tparam line - строка с временем открытия и закрытия
-    @return true - если формат времени верный, иначе - false
+    \brief Устанавливает время работы клуба
+    \param line - строка с временем открытия и закрытия
+    \return true — если формат времени верный, иначе — false
     */
     bool _setTime(std::string& line);
+
     /**
-    \brief Функция для получения кол-ва минут из
-    строки в формате "HH:MM"
-    \tparam str - время в формате строки
-    @return nullopt - если есть ошибка в формате, 
-    иначе - кол-во минут в chrono::minutes
+    \brief Преобразует строку в формате "HH:MM" в количество минут
+    \param str - строка с временем
+    \return nullopt — если ошибка в формате, иначе — количество минут в chrono::minutes
     */
     std::optional<std::chrono::minutes> _getMinutes(const std::string& str);
+
     /**
-    \brief Функция для проверки формата имени клиента
-    \tparam str - строка
+    \brief Проверка формата имени клиента
+    \param str - строка
     */
     bool _isValidName(const std::string& str);
+
     /**
-    \brief Функция для проверки кол-во столов
-    Подразумевается, что кол-во столов > 0
-    \tparam str - строка
+    \brief Проверка количества столов
+    Предполагается, что количество столов > 0
+    \param str - строка
     */
     int _validateTables(const std::string& str);
+
     /**
-    \brief Функция для проверки цены за час
-    Подразумевается, что цена за час > 0
-    \tparam str - строка
+    \brief Проверка цены за час
+    Предполагается, что цена за час > 0
+    \param str - строка
     */
     float _validatePrice(const std::string& str);
+
     /**
-    \brief Функция для проверки ID клиента
-    \tparam str - строка
+    \brief Проверка ID клиента
+    \param str - строка
     */
     int _validateID(const std::string& str);
+
     /**
-    \brief Функция для проверки стола, за который 
+    \brief Проверка номера стола, за который 
     хочет сесть посетитель
-    \tparam str - строка
-    \tparam tables - кол-во столов в клубе
+    \param str - строка
+    \param tables - количество столов в клубе
     */
     int _validateTable(const std::string& str, int tables);
+
     /**
-    \brief Функция для печати ошибки
+    \brief Вывод сообщения об ошибке
+    \param time - время ошибки
+    \param message - текст ошибки
     */
     void printError(const std::string& time, const std::string message) const;
+
     /**
-    \brief Функция для перевода chrono::minutes в string
+    \brief Перевод chrono::minutes в строку
+    \param minutes - количество минут
+    \return строка в формате "HH:MM"
     */
     std::string _minutesToString(const std::chrono::minutes& minutes) const;
 };
