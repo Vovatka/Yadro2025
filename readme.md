@@ -1,11 +1,7 @@
-Для запуска требуется: 
-```
-mkdir build
-cd build
-cmake ..
-make
-```
-
+## Требования
+- Любой компилятор C++: я использовал g++ 14.2.1
+- CMake версии не ниже 3.2
+- Любая система сборки: я использовал make 4.4.1
 Запуск:
 ```
 mkdir build
@@ -13,5 +9,5 @@ cd build
 cmake ..
 make
 ```
-
-Пример: ./club ../files/test1.txt
+Пример:
+    - ./club ../files/test1.txt
